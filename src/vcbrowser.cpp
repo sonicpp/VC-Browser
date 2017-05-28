@@ -70,6 +70,9 @@ void VCBrowser::open()
 		} /* TODO catch bad_alloc */
 
 		file->close();
+
+		treeView->expandAll();
+
 		delete file;
 	}
 }
