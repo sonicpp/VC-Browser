@@ -4,6 +4,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = vc-browser
 TEMPLATE = app
+QMAKE_CXXFLAGS += -std=c++11 -Wall -Wextra -pedantic
+DEFINES += _GLIBCXX_USE_CXX11_ABI=0 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66145
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
