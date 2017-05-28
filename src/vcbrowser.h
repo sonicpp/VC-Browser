@@ -15,6 +15,7 @@ public:
 private slots:
 	void open();
 	void quit();
+	void select(const QItemSelection & selected, const QItemSelection & deselected);
 private:
 	QWidget *central;
 	QTreeView *treeView;

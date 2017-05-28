@@ -2,6 +2,7 @@
 #include <sstream>
 
 #include "cbf.h"
+#include "file.h"
 
 struct CBFFile {
 	uint16_t structSize;	// size of the rest of this struct
@@ -103,28 +104,29 @@ void CBF::decryptTable(uint8_t *data, uint16_t size)
 	}
 }
 
-QStandardItem *CBF::addFile(std::string file, QStandardItem *item, bool col)
+QStandardItem *CBF::addFile(std::string file, QStandardItem *parent, bool col)
 {
 	bool found = false;
 
-	for (int i = 0; i < item->rowCount(); i++) {
-		if (item->child(item->rowCount() - 1)->text() ==
+	for (int i = 0; i < parent->rowCount(); i++) {
+		if (parent->child(parent->rowCount() - 1)->text() ==
 		QString(file.c_str())) {
-			item = item->child(item->rowCount() - 1);
+			parent = parent->child(parent->rowCount() - 1);
 			found = true;
 		}
 	}
 
 	if (!found) {
-		QList<QStandardItem *> rowItems;
-		rowItems << new QStandardItem(QString(file.c_str()));
-		item->appendRow(rowItems);
-		item = item->child(item->rowCount() - 1);
+		QStandardItem *item = new QStandardItem(QString(file.c_str()));
+		File *f = new File(file);
+		item->setData(QVariant::fromValue(f));
+		parent->appendRow(item);
+		parent = parent->child(parent->rowCount() - 1);
 		if(col)
-			item->setBackground(QBrush(QColor(150, 0, 0)));
+			parent->setBackground(QBrush(QColor(150, 0, 0)));
 	}
 
-	return item;
+	return parent;
 }
 
 std::vector<std::string> CBF::splitPath(const std::string &path) {

@@ -6,6 +6,7 @@
 
 #include "vcbrowser.h"
 #include "cbf.h"
+#include "file.h"
 
 VCBrowser::VCBrowser()
 {
@@ -21,12 +22,13 @@ VCBrowser::VCBrowser()
 	fileMenu->addAction(exitAction);
 
 	treeView = new QTreeView;
-
 	QStandardItemModel *standardModel = new QStandardItemModel;
 	root = standardModel->invisibleRootItem();
-
 	treeView->setModel(standardModel);
 	treeView->expandAll();
+	connect(treeView->selectionModel(),
+		SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+		this, SLOT(select(QItemSelection, QItemSelection)));
 
 	textEdit = new QTextEdit;
 
@@ -80,4 +82,13 @@ void VCBrowser::open()
 void VCBrowser::quit()
 {
 	qApp->quit();
+}
+
+void VCBrowser::select(const QItemSelection & selected, const QItemSelection & deselected)
+{
+	QModelIndexList indexes = selected.indexes();
+	foreach(const QModelIndex &index, indexes) {
+		File *f = index.data(Qt::UserRole + 1).value<File*>();
+		textEdit->setText(f->getData().c_str());
+	}
 }
