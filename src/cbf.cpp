@@ -5,9 +5,12 @@
 
 struct CBFFile {
 	uint16_t structSize;	// size of the rest of this struct
-	uint32_t unk1[8];
+	uint32_t offset;
+	uint32_t unk1[4];
+	uint32_t size;
+	uint32_t unk2[2];
 	uint32_t compressed;
-	uint32_t unk2;
+	uint32_t unk3;
 	char name[1];
 } __attribute__((packed));
 #define sizeof_CBF(file) ((file)->structSize + sizeof((file)->structSize))
@@ -23,25 +26,26 @@ struct CBFHeader {
 	uint32_t tableSize;
 } __attribute__((packed));
 
-CBF::CBF(std::ifstream *file, QStandardItem *item)
+CBF::CBF(std::ifstream *input, QStandardItem *item)
 throw (CBFException)
 {
 	struct CBFHeader header;
 	std::vector<struct CBFFile *> files;
 	uint8_t *table = NULL;
+	uint8_t *fd = NULL;
 	AbstractFile *ff;
 
-	file->exceptions(std::ifstream::eofbit | std::ifstream::failbit |
+	input->exceptions(std::ifstream::eofbit | std::ifstream::failbit |
 		std::ifstream::badbit);
 	try {
-		file->read((char *) &header, sizeof(struct CBFHeader));
+		input->read((char *) &header, sizeof(struct CBFHeader));
 		if (header.sig1 != 0x46474942 ||	// BIGF
 		header.sig2 != 0x4C425A01) {		// .ZBL
 			throw CBFException("Not a CBF file");
 		}
 		table = new uint8_t[header.tableSize];
-		file->ignore(header.tableOffset - sizeof(struct CBFHeader));
-		file->read((char *) table, header.tableSize);
+		input->ignore(header.tableOffset - sizeof(struct CBFHeader));
+		input->read((char *) table, header.tableSize);
 	} catch (std::ios_base::failure &e) {
 		if (table)
 			delete table;
@@ -61,6 +65,13 @@ throw (CBFException)
 			if (!ff->isDir()) {
 				if (((struct CBFFile *) *fit)->compressed)
 					ff->setCompressed(true);
+				else {
+					input->seekg(((struct CBFFile *) *fit)->offset, input->beg);
+					fd = new uint8_t[((struct CBFFile *) *fit)->size];
+					input->read((char *) fd, ((struct CBFFile *) *fit)->size);
+					decryptFile(fd, ((struct CBFFile *) *fit)->size);
+					ff->setData(fd);
+				}
 			}
 
 			nitem = addFile(ff, nitem);
@@ -93,7 +104,7 @@ void CBF::decryptTable(uint8_t *data, uint16_t size)
 	uint8_t lookUpTable[16] = {
 		0x32, 0xF3, 0x1E, 0x06, 0x45, 0x70, 0x32, 0xAA,
 		0x55, 0x3F, 0xF1, 0xDE, 0xA3, 0x44, 0x21, 0xB4};
-	uint8_t key = size;
+	uint16_t key = size;
 	uint8_t cryptedData;
 
 	data += sizeof(((struct CBFFile *) data)->structSize);
@@ -104,6 +115,14 @@ void CBF::decryptTable(uint8_t *data, uint16_t size)
 		data[ptr] ^= lookUpTable[key & 15];
 		key = cryptedData;
 	}
+}
+
+void CBF::decryptFile(uint8_t *data, uint32_t size)
+{
+	uint8_t key = size & 0xFF;
+
+	for(uint32_t i = 0; i < size; i++)
+		data[i] = (data[i] - 0x5A + key) ^ key;
 }
 
 QStandardItem *CBF::addFile(AbstractFile *file, QStandardItem *parent)

@@ -10,7 +10,7 @@
 class File: public AbstractFile{
 public:
 	File(std::string name);
-	virtual void abstract();
+	std::string getData();
 };
 
 #endif

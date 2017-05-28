@@ -7,6 +7,10 @@ File::File(std::string name)
 	setCompressed(false);
 }
 
-void File::abstract()
+std::string File::getData()
 {
+	if (getRawData() == NULL)
+		return getName();
+	else
+		return std::string((char *) getRawData());
 }

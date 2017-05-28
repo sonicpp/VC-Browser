@@ -7,6 +7,7 @@ Directory::Directory(std::string name)
 	setCompressed(false);
 }
 
-void Directory::abstract()
+std::string Directory::getData()
 {
+	return getName();
 }

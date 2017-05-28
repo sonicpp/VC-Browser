@@ -23,6 +23,7 @@ private:
 	std::vector<struct CBFFile *> getFileList(uint8_t *fileTable,
 		uint32_t tableSize);
 	void decryptTable(uint8_t *data, uint16_t size);
+	void decryptFile(uint8_t *data, uint32_t size);
 	QStandardItem *addFile(AbstractFile *file, QStandardItem *parent);
 	std::vector<std::string> splitPath(const std::string &path);
 };

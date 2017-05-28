@@ -6,7 +6,7 @@
 class Directory: public AbstractFile {
 public:
 	Directory(std::string name);
-	virtual void abstract();
+	virtual std::string getData();
 };
 
 #endif

@@ -3,11 +3,7 @@
 #include "directory.h"
 
 AbstractFile::AbstractFile(std::string name)
-:m_name(name), m_dir(false), m_compressed(false)
-{
-}
-
-void AbstractFile::abstract()
+:m_name(name), m_dir(false), m_compressed(false), m_data(NULL)
 {
 }
 
@@ -23,9 +19,19 @@ AbstractFile *AbstractFile::createFile(std::string name, bool dir)
 	return file;
 }
 
+void AbstractFile::setData(uint8_t *data)
+{
+	m_data = data;
+}
+
 void AbstractFile::setCompressed(bool compressed)
 {
 	m_compressed = compressed;
+}
+
+std::string AbstractFile::getData()
+{
+	return std::string();
 }
 
 std::string AbstractFile::getName()
@@ -41,6 +47,11 @@ bool AbstractFile::isDir()
 bool AbstractFile::isCompressed()
 {
 	return m_compressed;
+}
+
+uint8_t *AbstractFile::getRawData()
+{
+	return m_data;
 }
 
 void AbstractFile::setDir(bool dir)
