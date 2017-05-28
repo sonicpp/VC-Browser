@@ -6,7 +6,7 @@
 
 #include "vcbrowser.h"
 #include "cbf.h"
-#include "file.h"
+#include "abstractfile.h"
 
 VCBrowser::VCBrowser()
 {
@@ -88,7 +88,7 @@ void VCBrowser::select(const QItemSelection & selected, const QItemSelection & d
 {
 	QModelIndexList indexes = selected.indexes();
 	foreach(const QModelIndex &index, indexes) {
-		File *f = index.data(Qt::UserRole + 1).value<File*>();
+		AbstractFile *f = index.data(Qt::UserRole + 1).value<AbstractFile *>();
 		textEdit->setText(f->getName().c_str());
 	}
 }

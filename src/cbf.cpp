@@ -2,7 +2,6 @@
 #include <sstream>
 
 #include "cbf.h"
-#include "file.h"
 
 struct CBFFile {
 	uint16_t structSize;	// size of the rest of this struct
@@ -30,7 +29,7 @@ throw (CBFException)
 	struct CBFHeader header;
 	std::vector<struct CBFFile *> files;
 	uint8_t *table = NULL;
-	File *ff;
+	AbstractFile *ff;
 
 	file->exceptions(std::ifstream::eofbit | std::ifstream::failbit |
 		std::ifstream::badbit);
@@ -58,10 +57,8 @@ throw (CBFException)
 		QStandardItem *nitem = item;
 		for(std::vector<std::string>::iterator file = path.begin();
 		file != path.end(); ++file) {
-			ff = new File(*file);
-			if (file + 1 != path.end())
-				ff->setDir(true);
-			else {
+			ff = AbstractFile::createFile(*file, file + 1 != path.end());
+			if (!ff->isDir()) {
 				if (((struct CBFFile *) *fit)->compressed)
 					ff->setCompressed(true);
 			}
@@ -109,7 +106,7 @@ void CBF::decryptTable(uint8_t *data, uint16_t size)
 	}
 }
 
-QStandardItem *CBF::addFile(File *file, QStandardItem *parent)
+QStandardItem *CBF::addFile(AbstractFile *file, QStandardItem *parent)
 {
 	bool found = false;
 

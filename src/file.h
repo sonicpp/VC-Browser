@@ -5,20 +5,12 @@
 
 #include <QMetaType>
 
-class File {
-private:
-	std::string m_name;
-	bool m_dir;
-	bool m_compressed;
+#include "abstractfile.h"
+
+class File: public AbstractFile{
 public:
 	File(std::string name);
-	void setDir(bool dir);
-	void setCompressed(bool compressed);
-	std::string getName();
-	bool isDir();
-	bool isCompressed();
+	virtual void abstract();
 };
-
-Q_DECLARE_METATYPE(File *)
 
 #endif

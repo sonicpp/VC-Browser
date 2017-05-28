@@ -22,8 +22,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += src/main.cpp \
 	src/vcbrowser.cpp \
 	src/cbf.cpp \
-	src/file.cpp
+	src/file.cpp \
+	src/directory.cpp \
+	src/abstractfile.cpp
 
 HEADERS  += src/vcbrowser.h \
 	src/cbf.h \
-	src/file.h
+	src/file.h \
+	src/directory.h \
+	src/abstractfile.h
