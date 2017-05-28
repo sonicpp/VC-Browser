@@ -5,7 +5,9 @@
 
 struct CBFFile {
 	uint16_t structSize;	// size of the rest of this struct
-	uint32_t unk[10];
+	uint32_t unk1[8];
+	uint32_t compressed;
+	uint32_t unk2;
 	char name[1];
 } __attribute__((packed));
 #define sizeof_CBF(file) ((file)->structSize + sizeof((file)->structSize))
@@ -25,7 +27,7 @@ CBF::CBF(std::ifstream *file, QStandardItem *item)
 throw (CBFException)
 {
 	struct CBFHeader header;
-	std::vector<std::string> files;
+	std::vector<struct CBFFile *> files;
 	uint8_t *table = NULL;
 
 	file->exceptions(std::ifstream::eofbit | std::ifstream::failbit |
@@ -47,35 +49,43 @@ throw (CBFException)
 
 	files = getFileList(table, header.tableSize);
 
-	for(std::vector<std::string>::iterator fit = files.begin();
+	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
 	fit != files.end(); ++fit) {
-		std::vector<std::string> path = splitPath(*fit);
+		std::vector<std::string> path = splitPath(
+			((struct CBFFile *) *fit)->name);
 		QStandardItem *nitem = item;
 		for(std::vector<std::string>::iterator file = path.begin();
 		file != path.end(); ++file) {
-			nitem = addFile(*file, nitem);
+			if (file + 1 == path.end() &&
+			((struct CBFFile *) *fit)->compressed)
+				nitem = addFile(*file, nitem, true);
+			else
+				nitem = addFile(*file, nitem, false);
 		}
 	}
 }
 
-std::vector<std::string> CBF::getFileList(uint8_t *fileTable,
+std::vector<struct CBFFile *> CBF::getFileList(uint8_t *fileTable,
 	uint32_t tableSize)
 {
-	std::vector<std::string> fileList;
+	std::vector<struct CBFFile *> fileList;
 	struct CBFFile *file;
 
 	for (uint32_t pos = 0; pos + 2 < tableSize; pos += sizeof_CBF(file))
 	{
-		file = (struct CBFFile *) (fileTable + pos);
-		decryptFile((uint8_t *) file, file->structSize);
+		file = (struct CBFFile *) malloc(
+			sizeof_CBF((struct CBFFile *) (fileTable + pos)));
+		memcpy(file, (fileTable + pos),
+		       sizeof_CBF((struct CBFFile *) (fileTable + pos)));
+		decryptTable((uint8_t *) file, file->structSize);
 
-		fileList.push_back(std::string(file->name));
+		fileList.push_back(file);
 	}
 
 	return fileList;
 }
 
-void CBF::decryptFile(uint8_t *data, uint16_t size)
+void CBF::decryptTable(uint8_t *data, uint16_t size)
 {
 	uint8_t lookUpTable[16] = {
 		0x32, 0xF3, 0x1E, 0x06, 0x45, 0x70, 0x32, 0xAA,
@@ -93,7 +103,7 @@ void CBF::decryptFile(uint8_t *data, uint16_t size)
 	}
 }
 
-QStandardItem *CBF::addFile(std::string file, QStandardItem *item)
+QStandardItem *CBF::addFile(std::string file, QStandardItem *item, bool col)
 {
 	bool found = false;
 
@@ -110,6 +120,8 @@ QStandardItem *CBF::addFile(std::string file, QStandardItem *item)
 		rowItems << new QStandardItem(QString(file.c_str()));
 		item->appendRow(rowItems);
 		item = item->child(item->rowCount() - 1);
+		if(col)
+			item->setBackground(QBrush(QColor(150, 0, 0)));
 	}
 
 	return item;
