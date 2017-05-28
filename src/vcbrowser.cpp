@@ -5,6 +5,7 @@
 #include <QHBoxLayout>
 
 #include "vcbrowser.h"
+#include "cbf.h"
 
 VCBrowser::VCBrowser()
 {
@@ -45,25 +46,31 @@ void VCBrowser::open()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,
 		tr("Open File"), "", tr("CBF Files (*.cbf)"));
+	std::ifstream *file;
 
 	if (fileName != "") {
-		QFile file(fileName);
-		if (!file.open(QIODevice::ReadOnly)) {
+		file = new std::ifstream(fileName.toStdString(),
+			std::ios::in | std::ios::binary);
+		if (!file->is_open()) {
 			QMessageBox::critical(this, tr("Error"),
-				tr("Could not open file"));
-		return;
+				tr("File can not be opened"));
+			return;
 		}
 
-		QTextStream in(&file);
-		textEdit->setText(in.readAll());
-
 		QFileInfo fi(fileName);
-
 		QList<QStandardItem *> rowItems;
 		rowItems << new QStandardItem(fi.fileName());;
 		root->appendRow(rowItems);
 
-		file.close();
+		try {
+			CBF cbf(file, rowItems.first());
+		} catch (CBFException &e) {
+			QMessageBox::critical(this, tr("Error"),
+				tr(e.what()));
+		} /* TODO catch bad_alloc */
+
+		file->close();
+		delete file;
 	}
 }
 
