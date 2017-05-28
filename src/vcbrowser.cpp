@@ -89,6 +89,6 @@ void VCBrowser::select(const QItemSelection & selected, const QItemSelection & d
 	QModelIndexList indexes = selected.indexes();
 	foreach(const QModelIndex &index, indexes) {
 		File *f = index.data(Qt::UserRole + 1).value<File*>();
-		textEdit->setText(f->getData().c_str());
+		textEdit->setText(f->getName().c_str());
 	}
 }

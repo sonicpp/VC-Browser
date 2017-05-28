@@ -30,6 +30,7 @@ throw (CBFException)
 	struct CBFHeader header;
 	std::vector<struct CBFFile *> files;
 	uint8_t *table = NULL;
+	File *ff;
 
 	file->exceptions(std::ifstream::eofbit | std::ifstream::failbit |
 		std::ifstream::badbit);
@@ -57,11 +58,15 @@ throw (CBFException)
 		QStandardItem *nitem = item;
 		for(std::vector<std::string>::iterator file = path.begin();
 		file != path.end(); ++file) {
-			if (file + 1 == path.end() &&
-			((struct CBFFile *) *fit)->compressed)
-				nitem = addFile(*file, nitem, true);
-			else
-				nitem = addFile(*file, nitem, false);
+			ff = new File(*file);
+			if (file + 1 != path.end())
+				ff->setDir(true);
+			else {
+				if (((struct CBFFile *) *fit)->compressed)
+					ff->setCompressed(true);
+			}
+
+			nitem = addFile(ff, nitem);
 		}
 	}
 }
@@ -104,25 +109,24 @@ void CBF::decryptTable(uint8_t *data, uint16_t size)
 	}
 }
 
-QStandardItem *CBF::addFile(std::string file, QStandardItem *parent, bool col)
+QStandardItem *CBF::addFile(File *file, QStandardItem *parent)
 {
 	bool found = false;
 
 	for (int i = 0; i < parent->rowCount(); i++) {
 		if (parent->child(parent->rowCount() - 1)->text() ==
-		QString(file.c_str())) {
+		QString(file->getName().c_str())) {
 			parent = parent->child(parent->rowCount() - 1);
 			found = true;
 		}
 	}
 
 	if (!found) {
-		QStandardItem *item = new QStandardItem(QString(file.c_str()));
-		File *f = new File(file);
-		item->setData(QVariant::fromValue(f));
+		QStandardItem *item = new QStandardItem(QString(file->getName().c_str()));
+		item->setData(QVariant::fromValue(file));
 		parent->appendRow(item);
 		parent = parent->child(parent->rowCount() - 1);
-		if(col)
+		if (file->isCompressed())
 			parent->setBackground(QBrush(QColor(150, 0, 0)));
 	}
 

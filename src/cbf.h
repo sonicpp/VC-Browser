@@ -7,6 +7,8 @@
 
 #include <QStandardItem>
 
+#include "file.h"
+
 struct CBFException : public std::exception
 {
 	std::string m_msg;
@@ -21,7 +23,7 @@ private:
 	std::vector<struct CBFFile *> getFileList(uint8_t *fileTable,
 		uint32_t tableSize);
 	void decryptTable(uint8_t *data, uint16_t size);
-	QStandardItem *addFile(std::string file, QStandardItem *parent, bool col);
+	QStandardItem *addFile(File *file, QStandardItem *parent);
 	std::vector<std::string> splitPath(const std::string &path);
 };
 
