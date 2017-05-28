@@ -1,3 +1,5 @@
+#include <QTextEdit>
+
 #include "file.h"
 
 File::File(std::string name)
@@ -5,12 +7,18 @@ File::File(std::string name)
 {
 	setDir(false);
 	setCompressed(false);
+	m_widget = new QTextEdit;
+	((QTextEdit *) m_widget)->setText(name.c_str());
 }
 
-std::string File::getData()
+void File::setData(uint8_t *data)
 {
-	if (getRawData() == NULL)
-		return getName();
-	else
-		return std::string((char *) getRawData());
+	AbstractFile::setData(data);
+	if (data != NULL)
+		((QTextEdit *) m_widget)->setText(QString((char *) data));
+}
+
+QWidget *File::getWidget()
+{
+	return m_widget;
 }

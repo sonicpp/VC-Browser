@@ -8,9 +8,12 @@
 #include "abstractfile.h"
 
 class File: public AbstractFile{
+private:
+	QWidget *m_widget;
 public:
 	File(std::string name);
-	std::string getData();
+	virtual void setData(uint8_t *data);
+	virtual QWidget *getWidget();
 };
 
 #endif

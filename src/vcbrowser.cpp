@@ -30,11 +30,14 @@ VCBrowser::VCBrowser()
 		SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 		this, SLOT(select(QItemSelection, QItemSelection)));
 
-	textEdit = new QTextEdit;
+	file = new QStackedWidget;
+	edit = new QTextEdit;
+	file->addWidget(edit);
+	file->setCurrentWidget(edit);
 
 	QHBoxLayout *layout = new QHBoxLayout;
 	layout->addWidget(treeView);
-	layout->addWidget(textEdit);
+	layout->addWidget(file);
 
 	central = new QWidget;
 	central->setLayout(layout);
@@ -89,6 +92,8 @@ void VCBrowser::select(const QItemSelection & selected, const QItemSelection & d
 	QModelIndexList indexes = selected.indexes();
 	foreach(const QModelIndex &index, indexes) {
 		AbstractFile *f = index.data(Qt::UserRole + 1).value<AbstractFile *>();
-		textEdit->setText(f->getData().c_str());
+		if (file->indexOf(f->getWidget()) == -1)
+			file->addWidget(f->getWidget());
+		file->setCurrentWidget(f->getWidget());
 	}
 }

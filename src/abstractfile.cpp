@@ -29,9 +29,9 @@ void AbstractFile::setCompressed(bool compressed)
 	m_compressed = compressed;
 }
 
-std::string AbstractFile::getData()
+QWidget *AbstractFile::getWidget()
 {
-	return std::string();
+	return NULL;
 }
 
 std::string AbstractFile::getName()
@@ -49,7 +49,7 @@ bool AbstractFile::isCompressed()
 	return m_compressed;
 }
 
-uint8_t *AbstractFile::getRawData()
+uint8_t *AbstractFile::getData()
 {
 	return m_data;
 }

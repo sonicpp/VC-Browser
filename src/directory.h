@@ -4,9 +4,11 @@
 #include "abstractfile.h"
 
 class Directory: public AbstractFile {
+private:
+	QWidget *m_widget;
 public:
 	Directory(std::string name);
-	virtual std::string getData();
+	virtual QWidget *getWidget();
 };
 
 #endif

@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <QWidget>
 #include <QMetaType>
 
 class AbstractFile {
@@ -11,15 +12,15 @@ protected:
 	bool m_dir;
 	bool m_compressed;
 	uint8_t *m_data;
-	uint8_t *getRawData();
+	uint8_t *getData();
 	void setDir(bool dir);
 public:
 	AbstractFile(std::string name);
 	static AbstractFile *createFile(std::string name, bool dir);
-	void setData(uint8_t *data);
+	virtual void setData(uint8_t *data);
 	void setCompressed(bool compressed);
 	std::string getName();
-	virtual std::string getData() = 0;
+	virtual QWidget *getWidget() = 0;
 	bool isDir();
 	bool isCompressed();
 };

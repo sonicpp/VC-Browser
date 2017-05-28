@@ -1,3 +1,5 @@
+#include <QTextEdit>
+
 #include "directory.h"
 
 Directory::Directory(std::string name)
@@ -5,9 +7,11 @@ Directory::Directory(std::string name)
 {
 	setDir(true);
 	setCompressed(false);
+	m_widget = new QTextEdit;
+	((QTextEdit *) m_widget)->setText(name.c_str());
 }
 
-std::string Directory::getData()
+QWidget *Directory::getWidget()
 {
-	return getName();
+	return m_widget;
 }
