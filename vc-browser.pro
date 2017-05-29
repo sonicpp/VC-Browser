@@ -24,10 +24,12 @@ SOURCES += src/main.cpp \
 	src/cbf.cpp \
 	src/file.cpp \
 	src/directory.cpp \
-	src/abstractfile.cpp
+	src/abstractfile.cpp \
+	src/txt.cpp
 
 HEADERS  += src/vcbrowser.h \
 	src/cbf.h \
 	src/file.h \
 	src/directory.h \
-	src/abstractfile.h
+	src/abstractfile.h \
+	src/txt.h

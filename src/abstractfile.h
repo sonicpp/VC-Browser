@@ -17,7 +17,7 @@ protected:
 public:
 	AbstractFile(std::string name);
 	static AbstractFile *createFile(std::string name, bool dir);
-	virtual void setData(uint8_t *data);
+	virtual void setData(uint8_t *data, size_t size);
 	void setCompressed(bool compressed);
 	std::string getName();
 	virtual QWidget *getWidget() = 0;

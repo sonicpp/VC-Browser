@@ -11,9 +11,9 @@ File::File(std::string name)
 	((QTextEdit *) m_widget)->setText(name.c_str());
 }
 
-void File::setData(uint8_t *data)
+void File::setData(uint8_t *data, size_t size)
 {
-	AbstractFile::setData(data);
+	AbstractFile::setData(data, size);
 	if (data != NULL)
 		((QTextEdit *) m_widget)->setText(QString((char *) data));
 }

@@ -70,7 +70,7 @@ throw (CBFException)
 					fd = new uint8_t[((struct CBFFile *) *fit)->size];
 					input->read((char *) fd, ((struct CBFFile *) *fit)->size);
 					decryptFile(fd, ((struct CBFFile *) *fit)->size);
-					ff->setData(fd);
+					ff->setData(fd, ((struct CBFFile *) *fit)->size);
 				}
 			}
 
