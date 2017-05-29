@@ -8,6 +8,7 @@ TXT::TXT(std::string name)
 	setDir(false);
 	setCompressed(false);
 	m_widget = new QTextEdit;
+	((QTextEdit *) m_widget)->setReadOnly(true);
 }
 
 void TXT::setData(uint8_t *data, size_t size)
