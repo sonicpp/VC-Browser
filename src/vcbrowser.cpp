@@ -45,6 +45,11 @@ VCBrowser::VCBrowser()
 	setCentralWidget(central);
 
 	setWindowTitle(tr("VietCong Browser"));
+
+	progress = new QProgressDialog(this);
+	progress->setModal(true);
+	progress->setMinimumDuration(500);
+	progress->reset();
 }
 
 void VCBrowser::open()
@@ -67,8 +72,9 @@ void VCBrowser::open()
 		rowItems << new QStandardItem(fi.fileName());;
 		root->appendRow(rowItems);
 
+		progress->setLabelText(QString("Opening file:\n") + fileName);
 		try {
-			CBF cbf(file, rowItems.first());
+			CBF cbf(file, rowItems.first(), progress);
 		} catch (CBFException &e) {
 			QMessageBox::critical(this, tr("Error"),
 				tr(e.what()));

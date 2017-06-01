@@ -26,7 +26,7 @@ struct CBFHeader {
 	uint32_t tableSize;
 } __attribute__((packed));
 
-CBF::CBF(std::ifstream *input, QStandardItem *item)
+CBF::CBF(std::ifstream *input, QStandardItem *item, QProgressDialog *progress)
 throw (CBFException)
 {
 	struct CBFHeader header;
@@ -54,11 +54,18 @@ throw (CBFException)
 
 	files = getFileList(table, header.tableSize);
 
+	progress->setMaximum(files.size());
+	progress->setValue(0);
+	progress->show();
+
 	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
 	fit != files.end(); ++fit) {
+		if (progress->wasCanceled())
+			break;
 		std::vector<std::string> path = splitPath(
 			((struct CBFFile *) *fit)->name);
 		QStandardItem *nitem = item;
+
 		for(std::vector<std::string>::iterator file = path.begin();
 		file != path.end(); ++file) {
 			ff = AbstractFile::createFile(*file, file + 1 != path.end());
@@ -76,6 +83,7 @@ throw (CBFException)
 
 			nitem = addFile(ff, nitem);
 		}
+		progress->setValue(progress->value() + 1);
 	}
 }
 

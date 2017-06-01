@@ -6,6 +6,7 @@
 #include <fstream>
 
 #include <QStandardItem>
+#include <QProgressDialog>
 
 #include "abstractfile.h"
 
@@ -18,7 +19,8 @@ struct CBFException : public std::exception
 
 class CBF {
 public:
-	CBF(std::ifstream *file, QStandardItem *item) throw (CBFException);
+	CBF(std::ifstream *file, QStandardItem *item,
+		QProgressDialog *progress) throw (CBFException);
 private:
 	std::vector<struct CBFFile *> getFileList(uint8_t *fileTable,
 		uint32_t tableSize);

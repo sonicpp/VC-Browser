@@ -7,6 +7,7 @@
 #include <QTreeView>
 #include <QTextEdit>
 #include <QStandardItem>
+#include <QProgressDialog>
 
 class VCBrowser: public QMainWindow
 {
@@ -23,6 +24,7 @@ private:
 	QStandardItem *root;
 	QStackedWidget *file;
 	QTextEdit *edit;
+	QProgressDialog *progress;
 	QMenu *fileMenu;
 	QAction *openAction;
 	QAction *exitAction;
