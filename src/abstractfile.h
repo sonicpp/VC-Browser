@@ -1,28 +1,37 @@
 #ifndef _ABSTRACTFILE_H
 #define _ABSTRACTFILE_H
 
-#include <string>
-
+#include <vector>
 #include <QWidget>
-#include <QMetaType>
+#include <QStandardItem>
 
 class AbstractFile {
-protected:
-	std::string m_name;
+private:
 	bool m_dir;
+protected:
 	bool m_compressed;
-	uint8_t *m_data;
-	uint8_t *getData();
-	void setDir(bool dir);
+	QString m_name;
+	QWidget *mp_widget;
+	QStandardItem *mp_item;
+	AbstractFile *mp_parent;
+	std::vector<AbstractFile *> mp_children;
 public:
-	AbstractFile(std::string name);
-	static AbstractFile *createFile(std::string name, bool dir);
-	virtual void setData(uint8_t *data, size_t size);
-	void setCompressed(bool compressed);
-	std::string getName();
-	virtual QWidget *getWidget() = 0;
+	AbstractFile(bool dir, QString name, AbstractFile *p_parent,
+		     QStandardItem *p_item = NULL);
+	static AbstractFile *createFile(QString name,
+		AbstractFile *p_parent, std::ifstream *p_file);
+	static AbstractFile *createFile(QString name,
+		AbstractFile *p_parent, uint8_t *data, size_t size);
+	static AbstractFile *createDirectory(QString name,
+		AbstractFile *p_parent, QStandardItem *p_item = NULL);
+	bool addFile(AbstractFile *p_file, QString name);
+	//virtual void nothing() = 0;
 	bool isDir();
+	void setCompressed(bool compressed);
 	bool isCompressed();
+	QString getName();
+	QWidget *getWidget();
+	QStandardItem *getItem();
 };
 
 Q_DECLARE_METATYPE(AbstractFile *)

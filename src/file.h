@@ -2,18 +2,11 @@
 #define _FILE_H
 
 #include <string>
-
-#include <QMetaType>
-
 #include "abstractfile.h"
 
-class File: public AbstractFile{
-private:
-	QWidget *m_widget;
+class UnknownFile: public AbstractFile {
 public:
-	File(std::string name);
-	virtual void setData(uint8_t *data, size_t size);
-	virtual QWidget *getWidget();
+	UnknownFile(QString name, AbstractFile *p_parent);
 };
 
 #endif

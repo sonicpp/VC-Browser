@@ -1,12 +1,12 @@
+#include <fstream>
 #include <QtGui>
 #include <QMenuBar>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QHBoxLayout>
 
-#include "vcbrowser.h"
-#include "cbf.h"
 #include "abstractfile.h"
+#include "vcbrowser.h"
 
 VCBrowser::VCBrowser()
 {
@@ -23,7 +23,9 @@ VCBrowser::VCBrowser()
 
 	treeView = new QTreeView;
 	QStandardItemModel *standardModel = new QStandardItemModel;
-	root = standardModel->invisibleRootItem();
+	root_item = standardModel->invisibleRootItem();
+
+	root_file = AbstractFile::createDirectory(QString("root"), NULL, root_item);
 	treeView->setModel(standardModel);
 	treeView->expandAll();
 	connect(treeView->selectionModel(),
@@ -57,6 +59,8 @@ void VCBrowser::open()
 	QString fileName = QFileDialog::getOpenFileName(this,
 		tr("Open File"), "", tr("CBF Files (*.cbf)"));
 	std::ifstream *file;
+	AbstractFile *af;
+	QStringList path = fileName.split('\\');
 
 	if (fileName != "") {
 		file = new std::ifstream(fileName.toStdString(),
@@ -67,19 +71,18 @@ void VCBrowser::open()
 			return;
 		}
 
+		af = AbstractFile::createFile(path[path.size() - 1], root_file, file);
+		root_file->addFile(af, fileName);
+#if 0
 		QFileInfo fi(fileName);
-		QList<QStandardItem *> rowItems;
-		rowItems << new QStandardItem(fi.fileName());;
-		root->appendRow(rowItems);
-
 		progress->setLabelText(QString("Opening file:\n") + fileName);
-		try {
-			CBF cbf(file, rowItems.first(), progress);
-		} catch (CBFException &e) {
+		//try {
+			af = Directory::addFile(fi.fileName(), root);
+		/*} catch (CBFException &e) {
 			QMessageBox::critical(this, tr("Error"),
 				tr(e.what()));
-		} /* TODO catch bad_alloc */
-
+		} *//* TODO catch bad_alloc */
+#endif
 		file->close();
 
 		treeView->expandAll();

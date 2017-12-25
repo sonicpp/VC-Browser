@@ -3,12 +3,9 @@
 
 #include "txt.h"
 
-TXT::TXT(std::string name)
-:AbstractFile(name), m_str("")
+TXT::TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
+:AbstractFile(false, name, p_parent)
 {
-	setDir(false);
-	setCompressed(false);
-	m_widget = new QWidget;
 	m_layout = new QVBoxLayout;
 	m_edit = new QTextEdit;
 
@@ -17,24 +14,17 @@ TXT::TXT(std::string name)
 	m_status = new QStatusBar;
 	m_layout->addWidget(m_edit);
 	m_layout->addWidget(m_status);
-	m_widget->setLayout(m_layout);
-}
+	mp_widget->setLayout(m_layout);
 
-void TXT::setData(uint8_t *data, size_t size)
-{
-	AbstractFile::setData(data, size);
 	m_str.clear();
 	m_status->clearMessage();
 
-	if (data != NULL)
-		m_str.append(m_codec->toUnicode((char *) data));
+	if (data != NULL) {
+		/* TODO set \0 */
+		m_str = m_codec->toUnicode((char *) data);
 
-	m_edit->setText(m_str);
-	m_status->showMessage(QString("Bytes total: ") + QString::number(size) +
-		QString("; Chars total: ") + QString::number(m_str.size()));
-}
-
-QWidget *TXT::getWidget()
-{
-	return m_widget;
+		m_edit->setText(m_str);
+		m_status->showMessage(QString("Bytes total: ") + QString::number(size) +
+			QString("; Chars total: ") + QString::number(m_str.size()));
+	}
 }

@@ -9,6 +9,8 @@
 #include <QStandardItem>
 #include <QProgressDialog>
 
+#include "abstractfile.h"
+
 class VCBrowser: public QMainWindow
 {
 	Q_OBJECT
@@ -21,7 +23,8 @@ private slots:
 private:
 	QWidget *central;
 	QTreeView *treeView;
-	QStandardItem *root;
+	QStandardItem *root_item;
+	AbstractFile *root_file;
 	QStackedWidget *file;
 	QTextEdit *edit;
 	QProgressDialog *progress;

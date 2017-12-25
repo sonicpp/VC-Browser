@@ -1,6 +1,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "abstractfile.h"
 #include "cbf.h"
 
 struct CBFFile {
@@ -26,64 +27,48 @@ struct CBFHeader {
 	uint32_t tableSize;
 } __attribute__((packed));
 
-CBF::CBF(std::ifstream *input, QStandardItem *item, QProgressDialog *progress)
-throw (CBFException)
+CBF::CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
+:AbstractFile(true, name, p_parent)
 {
-	struct CBFHeader header;
+	struct CBFHeader *p_header;
 	std::vector<struct CBFFile *> files;
 	uint8_t *table = NULL;
 	uint8_t *fd = NULL;
 	AbstractFile *ff;
+	QStringList path;
 
-	input->exceptions(std::ifstream::eofbit | std::ifstream::failbit |
-		std::ifstream::badbit);
-	try {
-		input->read((char *) &header, sizeof(struct CBFHeader));
-		if (header.sig1 != 0x46474942 ||	// BIGF
-		header.sig2 != 0x4C425A01) {		// .ZBL
+	p_header = (struct CBFHeader *) data;
+	if (p_header->sig1 != 0x46474942 ||	// BIGF
+	p_header->sig2 != 0x4C425A01) {		// .ZBL
 			throw CBFException("Not a CBF file");
-		}
-		table = new uint8_t[header.tableSize];
-		input->ignore(header.tableOffset - sizeof(struct CBFHeader));
-		input->read((char *) table, header.tableSize);
-	} catch (std::ios_base::failure &e) {
-		if (table)
-			delete table;
-		throw CBFException("Invalid CBF file");
 	}
+	table = data + p_header->tableOffset;
 
-	files = getFileList(table, header.tableSize);
+	files = getFileList(table, p_header->tableSize);
 
+/*
 	progress->setMaximum(files.size());
 	progress->setValue(0);
 	progress->show();
-
+*/
 	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
 	fit != files.end(); ++fit) {
-		if (progress->wasCanceled())
-			break;
-		std::vector<std::string> path = splitPath(
-			((struct CBFFile *) *fit)->name);
-		QStandardItem *nitem = item;
+//		if (progress->wasCanceled())
+//			break;
+		QString n(((struct CBFFile *) *fit)->name);
+		path = n.split('\\');
 
-		for(std::vector<std::string>::iterator file = path.begin();
-		file != path.end(); ++file) {
-			ff = AbstractFile::createFile(*file, file + 1 != path.end());
-			if (!ff->isDir()) {
-				if (((struct CBFFile *) *fit)->compressed)
-					ff->setCompressed(true);
-				else {
-					input->seekg(((struct CBFFile *) *fit)->offset, input->beg);
-					fd = new uint8_t[((struct CBFFile *) *fit)->size];
-					input->read((char *) fd, ((struct CBFFile *) *fit)->size);
-					decryptFile(fd, ((struct CBFFile *) *fit)->size);
-					ff->setData(fd, ((struct CBFFile *) *fit)->size);
-				}
-			}
-
-			nitem = addFile(ff, nitem);
+		if (((struct CBFFile *) *fit)->compressed) {
+			ff = AbstractFile::createFile(path[path.size() - 1], this, NULL, 0u);
+			ff->setCompressed(true);
 		}
-		progress->setValue(progress->value() + 1);
+		else {
+			decryptFile(data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+			ff = AbstractFile::createFile(path[path.size() - 1], this, data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+			ff->setCompressed(false);
+		}
+		addFile(ff, n);
+		//progress->setValue(progress->value() + 1);
 	}
 }
 
@@ -131,40 +116,4 @@ void CBF::decryptFile(uint8_t *data, uint32_t size)
 
 	for(uint32_t i = 0; i < size; i++)
 		data[i] = (data[i] - 0x5A + key) ^ key;
-}
-
-QStandardItem *CBF::addFile(AbstractFile *file, QStandardItem *parent)
-{
-	bool found = false;
-
-	for (int i = 0; i < parent->rowCount(); i++) {
-		if (parent->child(parent->rowCount() - 1)->text() ==
-		QString(file->getName().c_str())) {
-			parent = parent->child(parent->rowCount() - 1);
-			found = true;
-		}
-	}
-
-	if (!found) {
-		QStandardItem *item = new QStandardItem(QString(file->getName().c_str()));
-		item->setData(QVariant::fromValue(file));
-		parent->appendRow(item);
-		parent = parent->child(parent->rowCount() - 1);
-		if (file->isCompressed())
-			parent->setBackground(QBrush(QColor(150, 0, 0)));
-	}
-
-	return parent;
-}
-
-std::vector<std::string> CBF::splitPath(const std::string &path) {
-	std::vector<std::string> files;
-	std::string file;
-	std::stringstream ss;
-
-	ss.str(path);
-	while (std::getline(ss, file, '\\'))
-		files.push_back(file);
-
-	return files;
 }
