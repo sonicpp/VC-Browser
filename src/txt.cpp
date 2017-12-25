@@ -6,6 +6,7 @@
 TXT::TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
 :AbstractFile(false, name, p_parent)
 {
+	char *buff;
 	m_layout = new QVBoxLayout;
 	m_edit = new QTextEdit;
 
@@ -19,12 +20,13 @@ TXT::TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
 	m_str.clear();
 	m_status->clearMessage();
 
-	if (data != NULL) {
-		/* TODO set \0 */
-		m_str = m_codec->toUnicode((char *) data);
+	buff = new char[size + 1];
+	memcpy(buff, data, size);
+	buff[size] = '\0';
+	m_str = m_codec->toUnicode(buff);
+	m_edit->setText(m_str);
+	m_status->showMessage(QString("Bytes total: ") + QString::number(size) +
+		QString("; Chars total: ") + QString::number(m_str.size()));
 
-		m_edit->setText(m_str);
-		m_status->showMessage(QString("Bytes total: ") + QString::number(size) +
-			QString("; Chars total: ") + QString::number(m_str.size()));
-	}
+	delete[] buff;
 }
