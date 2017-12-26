@@ -1,9 +1,5 @@
-#include <iostream>
-#include <sstream>
-
 #include <QApplication>
 
-#include "abstractfile.h"
 #include "cbf.h"
 
 struct CBFFile {
@@ -38,69 +34,22 @@ CBF::~CBF()
 {
 }
 
-std::vector<struct CBFFile *> CBF::getFileList(uint8_t *fileTable,
-	uint32_t tableSize)
-{
-	std::vector<struct CBFFile *> fileList;
-	struct CBFFile *file;
-
-	for (uint32_t pos = 0; pos + 2 < tableSize; pos += sizeof_CBF(file))
-	{
-		file = (struct CBFFile *) malloc(
-			sizeof_CBF((struct CBFFile *) (fileTable + pos)));
-		memcpy(file, (fileTable + pos),
-		       sizeof_CBF((struct CBFFile *) (fileTable + pos)));
-		decryptTable((uint8_t *) file, file->structSize);
-
-		fileList.push_back(file);
-	}
-
-	return fileList;
-}
-
-void CBF::decryptTable(uint8_t *data, uint16_t size)
-{
-	uint8_t lookUpTable[16] = {
-		0x32, 0xF3, 0x1E, 0x06, 0x45, 0x70, 0x32, 0xAA,
-		0x55, 0x3F, 0xF1, 0xDE, 0xA3, 0x44, 0x21, 0xB4};
-	uint16_t key = size;
-	uint8_t cryptedData;
-
-	data += sizeof(((struct CBFFile *) data)->structSize);
-
-	for (uint16_t ptr = 0; ptr < size; ptr++)
-	{
-		cryptedData = data[ptr];
-		data[ptr] ^= lookUpTable[key & 15];
-		key = cryptedData;
-	}
-}
-
-void CBF::decryptFile(uint8_t *data, uint32_t size)
-{
-	uint8_t key = size & 0xFF;
-
-	for(uint32_t i = 0; i < size; i++)
-		data[i] = (data[i] - 0x5A + key) ^ key;
-}
-
-bool CBF::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
+bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 {
 	struct CBFHeader *p_header;
 	std::vector<struct CBFFile *> files;
-	uint8_t *table = NULL;
-	uint8_t *fd = NULL;
+	uint8_t *p_table = NULL;
 	AbstractFile *ff;
 	QStringList path;
 
-	p_header = (struct CBFHeader *) data;
+	p_header = (struct CBFHeader *) p_data;
 	if (p_header->sig1 != 0x46474942 ||	// BIGF
 	p_header->sig2 != 0x4C425A01) {		// .ZBL
-			throw CBFException("Not a CBF file");
+			return false;
 	}
-	table = data + p_header->tableOffset;
+	p_table = p_data + p_header->tableOffset;
 
-	files = getFileList(table, p_header->tableSize);
+	files = getFileList(p_table, p_header->tableSize);
 
 	if (p_progress) {
 		p_progress->setMaximum(files.size());
@@ -121,9 +70,9 @@ bool CBF::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
 			ff->setCompressed(true);
 		}
 		else {
-			decryptFile(data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+			decryptFile(p_data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
 			ff->setCompressed(false);
-			ff->setData(data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+			ff->setData(p_data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
 		}
 		addFile(ff, n);
 		if (p_progress)
@@ -138,4 +87,52 @@ bool CBF::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
 			delete ff;
 		}
 	}
+
+	return true;
+}
+
+std::vector<struct CBFFile *> CBF::getFileList(uint8_t *p_fileTable,
+					       uint32_t tableSize)
+{
+	std::vector<struct CBFFile *> fileList;
+	struct CBFFile *p_file;
+
+	for (uint32_t pos = 0; pos + 2 < tableSize; pos += sizeof_CBF(p_file))
+	{
+		p_file = (struct CBFFile *) malloc(
+			sizeof_CBF((struct CBFFile *) (p_fileTable + pos)));
+		memcpy(p_file, (p_fileTable + pos),
+		       sizeof_CBF((struct CBFFile *) (p_fileTable + pos)));
+		decryptTable((uint8_t *) p_file, p_file->structSize);
+
+		fileList.push_back(p_file);
+	}
+
+	return fileList;
+}
+
+void CBF::decryptTable(uint8_t *p_data, uint16_t size)
+{
+	uint8_t p_lookUpTable[16] = {
+		0x32, 0xF3, 0x1E, 0x06, 0x45, 0x70, 0x32, 0xAA,
+		0x55, 0x3F, 0xF1, 0xDE, 0xA3, 0x44, 0x21, 0xB4};
+	uint16_t key = size;
+	uint8_t cryptedData;
+
+	p_data += sizeof(((struct CBFFile *) p_data)->structSize);
+
+	for (uint16_t ptr = 0; ptr < size; ptr++)
+	{
+		cryptedData = p_data[ptr];
+		p_data[ptr] ^= p_lookUpTable[key & 15];
+		key = cryptedData;
+	}
+}
+
+void CBF::decryptFile(uint8_t *p_data, uint32_t size)
+{
+	uint8_t key = size & 0xFF;
+
+	for(uint32_t i = 0; i < size; i++)
+		p_data[i] = (p_data[i] - 0x5A + key) ^ key;
 }
