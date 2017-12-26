@@ -16,6 +16,7 @@ class VCBrowser: public QMainWindow
 	Q_OBJECT
 public:
 	VCBrowser();
+	~VCBrowser();
 private slots:
 	void open();
 	void quit();

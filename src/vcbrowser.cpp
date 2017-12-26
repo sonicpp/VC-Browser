@@ -54,6 +54,11 @@ VCBrowser::VCBrowser()
 	progress->reset();
 }
 
+VCBrowser::~VCBrowser()
+{
+	delete root_file;
+}
+
 void VCBrowser::open()
 {
 	QString fileName = QFileDialog::getOpenFileName(this,

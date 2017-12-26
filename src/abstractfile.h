@@ -22,7 +22,7 @@ public:
 		AbstractFile *p_parent, QStandardItem *p_item = NULL);
 	AbstractFile(bool dir, QString name, AbstractFile *p_parent,
 		     QStandardItem *p_item = NULL);
-	~AbstractFile();
+	virtual ~AbstractFile();
 	virtual bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL) = 0;
 	bool addFile(AbstractFile *p_file, QString name);
 	bool isDir();
