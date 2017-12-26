@@ -3,8 +3,8 @@
 
 #include "txt.h"
 
-TXT::TXT(QString name, AbstractFile *p_parent)
-:AbstractFile(false, name, p_parent)
+TXT::TXT(QString name)
+:AbstractFile(false, name)
 {
 	mp_layout = new QVBoxLayout;
 	mp_edit = new QTextEdit;

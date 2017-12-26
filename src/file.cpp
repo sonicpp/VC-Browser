@@ -2,8 +2,8 @@
 
 #include "file.h"
 
-UnknownFile::UnknownFile(QString name, AbstractFile *p_parent)
-:AbstractFile(false, name, p_parent, NULL)
+UnknownFile::UnknownFile(QString name)
+:AbstractFile(false, name, NULL)
 {
 	mp_layout = new QVBoxLayout;
 	mp_edit = new QTextEdit;

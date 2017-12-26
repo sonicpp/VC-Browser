@@ -27,7 +27,7 @@ VCBrowser::VCBrowser()
 	QStandardItemModel *standardModel = new QStandardItemModel;
 	root_item = standardModel->invisibleRootItem();
 
-	root_file = AbstractFile::createDirectory(QString("root"), NULL, root_item);
+	root_file = AbstractFile::createDirectory(QString("root"), root_item);
 	treeView->setModel(standardModel);
 	treeView->expandAll();
 	connect(treeView->selectionModel(),
@@ -110,7 +110,7 @@ void VCBrowser::open()
 		file->read((char *) data, size);
 
 
-		af = AbstractFile::createFile(path[path.size() - 1], root_file);
+		af = AbstractFile::createFile(path[path.size() - 1]);
 		af->setData(data, size, progress);
 		if (progress->wasCanceled())
 			delete af;

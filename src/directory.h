@@ -12,10 +12,11 @@ protected:
 	QStatusBar *mp_status;
 	QVBoxLayout *mp_layout;
 public:
-	Directory(QString name, AbstractFile *p_parent,
-		QStandardItem *p_item = NULL);
+	Directory(QString name, QStandardItem *p_item = NULL);
 	~Directory();
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
+	bool addFile(AbstractFile *p_file, QString name);
+	void newFileNotify(bool dir);
 };
 
 #endif

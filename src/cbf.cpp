@@ -29,8 +29,8 @@ struct CBFHeader {
 	uint32_t tableSize;
 } __attribute__((packed));
 
-CBF::CBF(QString name, AbstractFile *p_parent)
-:AbstractFile(true, name, p_parent)
+CBF::CBF(QString name)
+:AbstractFile(true, name)
 {
 }
 
@@ -115,7 +115,7 @@ bool CBF::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
 		QString n(((struct CBFFile *) *fit)->name);
 		path = n.split('\\');
 
-		ff = AbstractFile::createFile(path[path.size() - 1], this);
+		ff = AbstractFile::createFile(path[path.size() - 1]);
 		if (((struct CBFFile *) *fit)->compressed) {
 
 			ff->setCompressed(true);

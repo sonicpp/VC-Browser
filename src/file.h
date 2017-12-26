@@ -13,7 +13,7 @@ private:
 	QStatusBar *mp_status;
 	QVBoxLayout *mp_layout;
 public:
-	UnknownFile(QString name, AbstractFile *p_parent);
+	UnknownFile(QString name);
 	~UnknownFile();
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };

@@ -4,32 +4,30 @@
 #include "file.h"
 #include "abstractfile.h"
 
-AbstractFile *AbstractFile::createFile(QString name, AbstractFile *p_parent)
+AbstractFile *AbstractFile::createFile(QString name)
 {
 	AbstractFile *file = NULL;
 	std::string nm = name.toStdString();
 
 	if (nm.substr(nm.find_last_of(".") + 1)== "TXT")
-		file = new TXT(name, p_parent);
+		file = new TXT(name);
 	else if (nm.substr(nm.find_last_of(".") + 1) == "cbf")
-		file = new CBF(name, p_parent);
+		file = new CBF(name);
 	else
-		file = new UnknownFile(name, p_parent);
+		file = new UnknownFile(name);
 
 	return file;
 }
 
-AbstractFile *AbstractFile::createDirectory(QString name,
-	AbstractFile *p_parent, QStandardItem *p_item)
+AbstractFile *AbstractFile::createDirectory(QString name, QStandardItem *p_item)
 {
-	AbstractFile *p_file = new Directory(name, p_parent, p_item);
+	AbstractFile *p_file = new Directory(name, p_item);
 
 	return p_file;
 }
 
-AbstractFile::AbstractFile(bool dir, QString name, AbstractFile *p_parent,
-			   QStandardItem *p_item)
-:m_dir(dir), m_name(name), mp_parent(p_parent)
+AbstractFile::AbstractFile(bool dir, QString name, QStandardItem *p_item)
+:m_dir(dir), m_name(name), mp_parent(NULL)
 {
 	mp_widget = new QWidget();
 
@@ -60,6 +58,20 @@ AbstractFile::~AbstractFile()
 		delete mp_item;
 }
 
+void AbstractFile::newFileNotify(bool dir)
+{
+	if (mp_parent)
+		mp_parent->newFileNotify(dir);
+}
+
+void AbstractFile::addFile(AbstractFile *p_file)
+{
+	mp_children.push_back(p_file);
+	mp_item->appendRow(p_file->getItem());
+	p_file->setParent(this);
+	newFileNotify(p_file->isDir());
+}
+
 bool AbstractFile::addFile(AbstractFile *p_file, QString name)
 {
 	QStringList path = name.split('\\');
@@ -80,9 +92,7 @@ bool AbstractFile::addFile(AbstractFile *p_file, QString name)
 		/* File (or directory) with this name already exist */
 		if (p_child != NULL)
 			return false;
-
-		mp_children.push_back(p_file);
-		mp_item->appendRow(p_file->getItem());
+		addFile(p_file);
 		return true;
 	}
 	/* Add file to sub directory */
@@ -90,9 +100,8 @@ bool AbstractFile::addFile(AbstractFile *p_file, QString name)
 	{
 		/* Sub directory does not exist yet */
 		if (p_child == NULL) {
-			p_child = createDirectory(path[0],	this);
-			mp_children.push_back(p_child);
-			mp_item->appendRow(p_child->getItem());
+			p_child = createDirectory(path[0]);
+			addFile(p_child);
 		}
 		for (int i = 1; i < path.size() - 1; i++)
 			suffix += path[i] + QString('\\');
@@ -129,4 +138,39 @@ QWidget *AbstractFile::getWidget()
 QStandardItem *AbstractFile::getItem()
 {
 	return mp_item;
+}
+
+void AbstractFile::setParent(AbstractFile *p_parent)
+{
+	mp_parent = p_parent;
+}
+
+uint32_t AbstractFile::getDirCnt()
+{
+	uint32_t res = 0;
+
+	if (m_dir) {
+		for (int i = 0; i < mp_children.size(); i++) {
+			if (mp_children[i]->isDir())
+				res += mp_children[i]->getDirCnt() + 1u;
+		}
+	}
+
+	return res;
+}
+
+uint32_t AbstractFile::getFileCnt()
+{
+	uint32_t res = 0;
+
+	if (m_dir) {
+		for (int i = 0; i < mp_children.size(); i++) {
+			if (mp_children[i]->isDir())
+				res += mp_children[i]->getFileCnt();
+			else
+				res += 1u;
+		}
+	}
+
+	return res;
 }
