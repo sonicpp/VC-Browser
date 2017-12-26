@@ -1,7 +1,5 @@
-#include "abstractfile.h"
 #include "directory.h"
 
-#include <iostream>
 Directory::Directory(QString name, QStandardItem *p_item)
 :AbstractFile(true, name, p_item)
 {
@@ -14,6 +12,8 @@ Directory::Directory(QString name, QStandardItem *p_item)
 	mp_layout->addWidget(mp_edit);
 	mp_layout->addWidget(mp_status);
 	mp_widget->setLayout(mp_layout);
+
+	redrawWidget();
 }
 
 Directory::~Directory()
@@ -23,17 +23,8 @@ Directory::~Directory()
 	delete mp_layout;
 }
 
-void Directory::newFileNotify(bool dir)
-{
-	AbstractFile::newFileNotify(dir);
-	mp_status->clearMessage();
-	mp_status->showMessage(QString("Subdirectories : ") +
-			       QString::number(getDirCnt()) +
-			       QString("; files: ") +
-			       QString::number(getFileCnt()));
-}
-
-bool Directory::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
+bool Directory::setData(uint8_t *p_data, size_t size,
+			QProgressDialog *p_progress)
 {
 	return false;
 }
@@ -44,12 +35,23 @@ bool Directory::addFile(AbstractFile *p_file, QString name)
 
 	ret = AbstractFile::addFile(p_file, name);
 	if (ret) {
-		mp_status->clearMessage();
-		mp_status->showMessage(QString("Subdirectories : ") +
-				       QString::number(getDirCnt()) +
-				       QString("; files: ") +
-				       QString::number(getFileCnt()));
+		redrawWidget();
 	}
 
 	return ret;
+}
+
+void Directory::newFileNotify(bool dir)
+{
+	AbstractFile::newFileNotify(dir);
+	redrawWidget();
+}
+
+void Directory::redrawWidget(void)
+{
+	mp_status->clearMessage();
+	mp_status->showMessage(QString("Subdirectories : ") +
+			       QString::number(getDirCnt()) +
+			       QString("; files: ") +
+			       QString::number(getFileCnt()));
 }

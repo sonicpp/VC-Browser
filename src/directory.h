@@ -4,19 +4,25 @@
 #include <QTextEdit>
 #include <QStatusBar>
 #include <QVBoxLayout>
+#include <QString>
+#include <QStandardItem>
+#include <QProgressBar>
+
 #include "abstractfile.h"
 
 class Directory: public AbstractFile {
-protected:
-	QTextEdit *mp_edit;
-	QStatusBar *mp_status;
-	QVBoxLayout *mp_layout;
 public:
 	Directory(QString name, QStandardItem *p_item = NULL);
 	~Directory();
-	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
+	bool setData(uint8_t *p_data, size_t size,
+		     QProgressDialog *p_progress = NULL);
 	bool addFile(AbstractFile *p_file, QString name);
 	void newFileNotify(bool dir);
+private:
+	QTextEdit *mp_edit;
+	QStatusBar *mp_status;
+	QVBoxLayout *mp_layout;
+	void redrawWidget();
 };
 
-#endif
+#endif	// _DIRECTORY_H
