@@ -7,6 +7,7 @@
 class UnknownFile: public AbstractFile {
 public:
 	UnknownFile(QString name, AbstractFile *p_parent);
+	~UnknownFile();
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };
 
