@@ -10,6 +10,7 @@
 
 VCBrowser::VCBrowser()
 {
+	/* Create menu */
 	openAction = new QAction(tr("&Open"), this);
 	exitAction = new QAction(tr("E&xit"), this);
 
@@ -21,6 +22,7 @@ VCBrowser::VCBrowser()
 	fileMenu->addSeparator();
 	fileMenu->addAction(exitAction);
 
+	/* Create TreeView */
 	treeView = new QTreeView;
 	QStandardItemModel *standardModel = new QStandardItemModel;
 	root_item = standardModel->invisibleRootItem();
@@ -32,11 +34,13 @@ VCBrowser::VCBrowser()
 		SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
 		this, SLOT(select(QItemSelection, QItemSelection)));
 
+	/* Create File view */
 	file = new QStackedWidget;
 	edit = new QTextEdit;
 	file->addWidget(edit);
 	file->setCurrentWidget(edit);
 
+	/* Set layout */
 	QHBoxLayout *layout = new QHBoxLayout;
 	layout->addWidget(treeView);
 	layout->addWidget(file);
@@ -56,7 +60,24 @@ VCBrowser::VCBrowser()
 
 VCBrowser::~VCBrowser()
 {
+	delete progress;
+
+	/* Delete menu */
+	delete openAction;
+	delete exitAction;
+
+	/* Delete TreeView */
+	//delete standardModel;
 	delete root_file;
+	delete treeView;
+
+	/* Delete File view */
+	delete edit;
+	delete file;
+
+	/* Delete layout */
+	//delete layout;
+	delete central;
 }
 
 void VCBrowser::open()
