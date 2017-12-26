@@ -14,8 +14,7 @@ private:
 	QStatusBar *m_status;
 	QVBoxLayout *m_layout;
 public:
-	TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size);
-	bool setData(std::ifstream *p_file, QProgressDialog *p_progress = NULL);
+	TXT(QString name, AbstractFile *p_parent);
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };
 

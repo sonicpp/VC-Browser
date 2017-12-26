@@ -3,10 +3,9 @@
 
 #include "txt.h"
 
-TXT::TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
+TXT::TXT(QString name, AbstractFile *p_parent)
 :AbstractFile(false, name, p_parent)
 {
-	char *buff;
 	m_layout = new QVBoxLayout;
 	m_edit = new QTextEdit;
 
@@ -17,26 +16,23 @@ TXT::TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
 	m_layout->addWidget(m_status);
 	mp_widget->setLayout(m_layout);
 
+}
+
+bool TXT::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
+{
+	char *buff;
+
 	m_str.clear();
 	m_status->clearMessage();
 
 	buff = new char[size + 1];
 	memcpy(buff, data, size);
 	buff[size] = '\0';
+
 	m_str = m_codec->toUnicode(buff);
 	m_edit->setText(m_str);
 	m_status->showMessage(QString("Bytes total: ") + QString::number(size) +
 		QString("; Chars total: ") + QString::number(m_str.size()));
 
 	delete[] buff;
-}
-
-bool TXT::setData(std::ifstream *p_file, QProgressDialog *p_progress)
-{
-
-}
-
-bool TXT::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
-{
-
 }

@@ -14,7 +14,6 @@ protected:
 public:
 	Directory(QString name, AbstractFile *p_parent,
 		QStandardItem *p_item = NULL);
-	bool setData(std::ifstream *p_file, QProgressDialog *p_progress = NULL);
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };
 

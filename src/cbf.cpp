@@ -29,60 +29,9 @@ struct CBFHeader {
 	uint32_t tableSize;
 } __attribute__((packed));
 
-CBF::CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size, QProgressDialog *p_progress)
+CBF::CBF(QString name, AbstractFile *p_parent)
 :AbstractFile(true, name, p_parent)
 {
-	struct CBFHeader *p_header;
-	std::vector<struct CBFFile *> files;
-	uint8_t *table = NULL;
-	uint8_t *fd = NULL;
-	AbstractFile *ff;
-	QStringList path;
-
-	p_header = (struct CBFHeader *) data;
-	if (p_header->sig1 != 0x46474942 ||	// BIGF
-	p_header->sig2 != 0x4C425A01) {		// .ZBL
-			throw CBFException("Not a CBF file");
-	}
-	table = data + p_header->tableOffset;
-
-	files = getFileList(table, p_header->tableSize);
-
-	if (p_progress) {
-		p_progress->setMaximum(files.size());
-		p_progress->setValue(0);
-		p_progress->show();
-	}
-
-	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
-	fit != files.end(); ++fit) {
-		if (p_progress && p_progress->wasCanceled())
-			break;
-		QString n(((struct CBFFile *) *fit)->name);
-		path = n.split('\\');
-
-		if (((struct CBFFile *) *fit)->compressed) {
-			ff = AbstractFile::createFile(path[path.size() - 1], this, NULL, 0u, NULL);
-			ff->setCompressed(true);
-		}
-		else {
-			decryptFile(data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
-			ff = AbstractFile::createFile(path[path.size() - 1], this, data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
-			ff->setCompressed(false);
-		}
-		addFile(ff, n);
-		if (p_progress)
-			p_progress->setValue(p_progress->value() + 1);
-		qApp->processEvents();
-	}
-
-	if (p_progress && p_progress->wasCanceled()) {
-		while (!mp_children.empty()) {
-			ff = mp_children.back();
-			mp_children.pop_back();
-			delete ff;
-		}
-	}
 }
 
 std::vector<struct CBFFile *> CBF::getFileList(uint8_t *fileTable,
@@ -131,12 +80,58 @@ void CBF::decryptFile(uint8_t *data, uint32_t size)
 		data[i] = (data[i] - 0x5A + key) ^ key;
 }
 
-bool CBF::setData(std::ifstream *p_file, QProgressDialog *p_progress)
-{
-
-}
-
 bool CBF::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
 {
+	struct CBFHeader *p_header;
+	std::vector<struct CBFFile *> files;
+	uint8_t *table = NULL;
+	uint8_t *fd = NULL;
+	AbstractFile *ff;
+	QStringList path;
 
+	p_header = (struct CBFHeader *) data;
+	if (p_header->sig1 != 0x46474942 ||	// BIGF
+	p_header->sig2 != 0x4C425A01) {		// .ZBL
+			throw CBFException("Not a CBF file");
+	}
+	table = data + p_header->tableOffset;
+
+	files = getFileList(table, p_header->tableSize);
+
+	if (p_progress) {
+		p_progress->setMaximum(files.size());
+		p_progress->setValue(0);
+		p_progress->show();
+	}
+
+	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
+	fit != files.end(); ++fit) {
+		if (p_progress && p_progress->wasCanceled())
+			break;
+		QString n(((struct CBFFile *) *fit)->name);
+		path = n.split('\\');
+
+		ff = AbstractFile::createFile(path[path.size() - 1], this);
+		if (((struct CBFFile *) *fit)->compressed) {
+
+			ff->setCompressed(true);
+		}
+		else {
+			decryptFile(data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+			ff->setCompressed(false);
+			ff->setData(data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+		}
+		addFile(ff, n);
+		if (p_progress)
+			p_progress->setValue(p_progress->value() + 1);
+		qApp->processEvents();
+	}
+
+	if (p_progress && p_progress->wasCanceled()) {
+		while (!mp_children.empty()) {
+			ff = mp_children.back();
+			mp_children.pop_back();
+			delete ff;
+		}
+	}
 }

@@ -16,11 +16,6 @@ Directory::Directory(QString name, AbstractFile *p_parent,
 	mp_widget->setLayout(m_layout);
 }
 
-bool Directory::setData(std::ifstream *p_file, QProgressDialog *p_progress)
-{
-	return false;
-}
-
 bool Directory::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
 {
 	return false;

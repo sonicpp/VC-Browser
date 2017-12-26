@@ -17,19 +17,14 @@ protected:
 	AbstractFile *mp_parent;
 	std::vector<AbstractFile *> mp_children;
 public:
-	static AbstractFile *createFile(QString name,
-		AbstractFile *p_parent, std::ifstream *p_file, QProgressDialog *p_progress = NULL);
-	static AbstractFile *createFile(QString name,
-		AbstractFile *p_parent, uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
+	static AbstractFile *createFile(QString name, AbstractFile *p_parent);
 	static AbstractFile *createDirectory(QString name,
 		AbstractFile *p_parent, QStandardItem *p_item = NULL);
 	AbstractFile(bool dir, QString name, AbstractFile *p_parent,
 		     QStandardItem *p_item = NULL);
 	~AbstractFile();
-	virtual bool setData(std::ifstream *p_file, QProgressDialog *p_progress = NULL) = 0;
 	virtual bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL) = 0;
 	bool addFile(AbstractFile *p_file, QString name);
-	//virtual void nothing() = 0;
 	bool isDir();
 	void setCompressed(bool compressed);
 	bool isCompressed();

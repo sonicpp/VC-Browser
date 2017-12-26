@@ -72,7 +72,20 @@ void VCBrowser::open()
 		}
 
 		progress->setLabelText(QString("Opening file:\n") + fileName);
-		af = AbstractFile::createFile(path[path.size() - 1], root_file, file, progress);
+
+		uint8_t *data;
+		size_t size;
+
+		file->seekg(0, file->end);
+		size = file->tellg();
+		file->seekg(0, file->beg);
+
+		data = new uint8_t[size];
+		file->read((char *) data, size);
+
+
+		af = AbstractFile::createFile(path[path.size() - 1], root_file);
+		af->setData(data, size, progress);
 		if (progress->wasCanceled())
 			delete af;
 		else
