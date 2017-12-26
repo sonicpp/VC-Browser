@@ -130,3 +130,13 @@ void CBF::decryptFile(uint8_t *data, uint32_t size)
 	for(uint32_t i = 0; i < size; i++)
 		data[i] = (data[i] - 0x5A + key) ^ key;
 }
+
+bool CBF::setData(std::ifstream *p_file, QProgressDialog *p_progress)
+{
+
+}
+
+bool CBF::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
+{
+
+}

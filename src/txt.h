@@ -15,6 +15,8 @@ private:
 	QVBoxLayout *m_layout;
 public:
 	TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size);
+	bool setData(std::ifstream *p_file, QProgressDialog *p_progress = NULL);
+	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };
 
 #endif

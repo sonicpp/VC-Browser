@@ -30,3 +30,13 @@ TXT::TXT(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
 
 	delete[] buff;
 }
+
+bool TXT::setData(std::ifstream *p_file, QProgressDialog *p_progress)
+{
+
+}
+
+bool TXT::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
+{
+
+}

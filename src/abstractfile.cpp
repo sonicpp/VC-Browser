@@ -4,28 +4,6 @@
 #include "file.h"
 #include "abstractfile.h"
 
-AbstractFile::AbstractFile(bool dir, QString name, AbstractFile *p_parent,
-			   QStandardItem *p_item)
-:m_dir(dir), m_name(name), mp_parent(p_parent)
-{
-	mp_widget = new QWidget();
-	mp_item = (p_item == NULL) ? (new QStandardItem(name)) : (p_item);
-	mp_item->setData(QVariant::fromValue(this));
-}
-
-AbstractFile::~AbstractFile()
-{
-	AbstractFile *p_child;
-
-	while (!mp_children.empty()) {
-		p_child = mp_children.back();
-		mp_children.pop_back();
-		delete p_child;
-	}
-
-	delete mp_widget;
-}
-
 AbstractFile *AbstractFile::createFile(QString name,
 	AbstractFile *p_parent, std::ifstream *p_file, QProgressDialog *p_dialog)
 {
@@ -68,6 +46,28 @@ AbstractFile *AbstractFile::createDirectory(QString name,
 	AbstractFile *p_file = new Directory(name, p_parent, p_item);
 
 	return p_file;
+}
+
+AbstractFile::AbstractFile(bool dir, QString name, AbstractFile *p_parent,
+			   QStandardItem *p_item)
+:m_dir(dir), m_name(name), mp_parent(p_parent)
+{
+	mp_widget = new QWidget();
+	mp_item = (p_item == NULL) ? (new QStandardItem(name)) : (p_item);
+	mp_item->setData(QVariant::fromValue(this));
+}
+
+AbstractFile::~AbstractFile()
+{
+	AbstractFile *p_child;
+
+	while (!mp_children.empty()) {
+		p_child = mp_children.back();
+		mp_children.pop_back();
+		delete p_child;
+	}
+
+	delete mp_widget;
 }
 
 bool AbstractFile::addFile(AbstractFile *p_file, QString name)
