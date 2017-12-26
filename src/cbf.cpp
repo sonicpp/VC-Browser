@@ -1,6 +1,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <QApplication>
+
 #include "abstractfile.h"
 #include "cbf.h"
 
@@ -27,7 +29,7 @@ struct CBFHeader {
 	uint32_t tableSize;
 } __attribute__((packed));
 
-CBF::CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
+CBF::CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size, QProgressDialog *p_progress)
 :AbstractFile(true, name, p_parent)
 {
 	struct CBFHeader *p_header;
@@ -46,20 +48,21 @@ CBF::CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
 
 	files = getFileList(table, p_header->tableSize);
 
-/*
-	progress->setMaximum(files.size());
-	progress->setValue(0);
-	progress->show();
-*/
+	if (p_progress) {
+		p_progress->setMaximum(files.size());
+		p_progress->setValue(0);
+		p_progress->show();
+	}
+
 	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
 	fit != files.end(); ++fit) {
-//		if (progress->wasCanceled())
-//			break;
+		if (p_progress && p_progress->wasCanceled())
+			break;
 		QString n(((struct CBFFile *) *fit)->name);
 		path = n.split('\\');
 
 		if (((struct CBFFile *) *fit)->compressed) {
-			ff = AbstractFile::createFile(path[path.size() - 1], this, NULL, 0u);
+			ff = AbstractFile::createFile(path[path.size() - 1], this, NULL, 0u, NULL);
 			ff->setCompressed(true);
 		}
 		else {
@@ -68,7 +71,17 @@ CBF::CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size)
 			ff->setCompressed(false);
 		}
 		addFile(ff, n);
-		//progress->setValue(progress->value() + 1);
+		if (p_progress)
+			p_progress->setValue(p_progress->value() + 1);
+		qApp->processEvents();
+	}
+
+	if (p_progress && p_progress->wasCanceled()) {
+		while (!mp_children.empty()) {
+			ff = mp_children.back();
+			mp_children.pop_back();
+			delete ff;
+		}
 	}
 }
 

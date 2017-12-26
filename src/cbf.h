@@ -9,6 +9,7 @@
 #include <QTextEdit>
 #include <QStatusBar>
 #include <QVBoxLayout>
+#include <QProgressDialog>
 #include "abstractfile.h"
 
 struct CBFException : public std::exception
@@ -28,7 +29,7 @@ private:
 	void decryptTable(uint8_t *data, uint16_t size);
 	void decryptFile(uint8_t *data, uint32_t size);
 public:
-	CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size);
+	CBF(QString name, AbstractFile *p_parent, uint8_t *data, size_t size, QProgressDialog *p_progress);
 };
 
 #endif

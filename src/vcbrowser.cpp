@@ -71,11 +71,15 @@ void VCBrowser::open()
 			return;
 		}
 
-		af = AbstractFile::createFile(path[path.size() - 1], root_file, file);
-		root_file->addFile(af, fileName);
+		progress->setLabelText(QString("Opening file:\n") + fileName);
+		af = AbstractFile::createFile(path[path.size() - 1], root_file, file, progress);
+		if (progress->wasCanceled())
+			delete af;
+		else
+			root_file->addFile(af, fileName);
+		progress->reset();
 #if 0
 		QFileInfo fi(fileName);
-		progress->setLabelText(QString("Opening file:\n") + fileName);
 		//try {
 			af = Directory::addFile(fi.fileName(), root);
 		/*} catch (CBFException &e) {

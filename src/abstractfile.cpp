@@ -13,8 +13,21 @@ AbstractFile::AbstractFile(bool dir, QString name, AbstractFile *p_parent,
 	mp_item->setData(QVariant::fromValue(this));
 }
 
+AbstractFile::~AbstractFile()
+{
+	AbstractFile *p_child;
+
+	while (!mp_children.empty()) {
+		p_child = mp_children.back();
+		mp_children.pop_back();
+		delete p_child;
+	}
+
+	delete mp_widget;
+}
+
 AbstractFile *AbstractFile::createFile(QString name,
-	AbstractFile *p_parent, std::ifstream *p_file)
+	AbstractFile *p_parent, std::ifstream *p_file, QProgressDialog *p_dialog)
 {
 	AbstractFile *p_ret;
 	uint8_t *data;
@@ -27,14 +40,14 @@ AbstractFile *AbstractFile::createFile(QString name,
 	data = new uint8_t[size];
 	p_file->read((char *) data, size);
 
-	p_ret = createFile(name, p_parent, data, size);
+	p_ret = createFile(name, p_parent, data, size, p_dialog);
 	delete[] data;
 
 	return p_ret;
 }
 
 AbstractFile *AbstractFile::createFile(QString name,
-	AbstractFile *p_parent, uint8_t *data, size_t size)
+	AbstractFile *p_parent, uint8_t *data, size_t size, QProgressDialog *p_progress)
 {
 	AbstractFile *file = NULL;
 	std::string nm = name.toStdString();
@@ -42,7 +55,7 @@ AbstractFile *AbstractFile::createFile(QString name,
 	if (nm.substr(nm.find_last_of(".") + 1)== "TXT")
 		file = new TXT(name, p_parent, data, size);
 	else if (nm.substr(nm.find_last_of(".") + 1) == "cbf")
-		file = new CBF(name, p_parent, data, size);
+		file = new CBF(name, p_parent, data, size, p_progress);
 	else
 		file = new UnknownFile(name, p_parent);
 

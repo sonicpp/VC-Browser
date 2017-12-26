@@ -4,6 +4,7 @@
 #include <vector>
 #include <QWidget>
 #include <QStandardItem>
+#include <QProgressDialog>
 
 class AbstractFile {
 private:
@@ -18,10 +19,11 @@ protected:
 public:
 	AbstractFile(bool dir, QString name, AbstractFile *p_parent,
 		     QStandardItem *p_item = NULL);
+	~AbstractFile();
 	static AbstractFile *createFile(QString name,
-		AbstractFile *p_parent, std::ifstream *p_file);
+		AbstractFile *p_parent, std::ifstream *p_file, QProgressDialog *p_progress = NULL);
 	static AbstractFile *createFile(QString name,
-		AbstractFile *p_parent, uint8_t *data, size_t size);
+		AbstractFile *p_parent, uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 	static AbstractFile *createDirectory(QString name,
 		AbstractFile *p_parent, QStandardItem *p_item = NULL);
 	bool addFile(AbstractFile *p_file, QString name);
