@@ -32,6 +32,7 @@ private:
 	QMenu *fileMenu;
 	QAction *openAction;
 	QAction *exitAction;
+	void expandItem(QStandardItem *p_base);
 };
 
 #endif

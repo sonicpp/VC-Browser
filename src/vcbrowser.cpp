@@ -115,8 +115,10 @@ void VCBrowser::open()
 		delete[] data;
 		if (progress->wasCanceled())
 			delete af;
-		else
+		else {
 			root_file->addFile(af, fileName);
+			expandItem(af->getItem());
+		}
 		progress->reset();
 #if 0
 		QFileInfo fi(fileName);
@@ -128,8 +130,6 @@ void VCBrowser::open()
 		} *//* TODO catch bad_alloc */
 #endif
 		file->close();
-
-		treeView->expandAll();
 
 		delete file;
 	}
@@ -149,4 +149,13 @@ void VCBrowser::select(const QItemSelection & selected, const QItemSelection & d
 			file->addWidget(f->getWidget());
 		file->setCurrentWidget(f->getWidget());
 	}
+}
+
+void VCBrowser::expandItem(QStandardItem *p_base)
+{
+	for (int i = 0; i < p_base->rowCount(); i++) {
+		expandItem(p_base->child(i));
+	}
+
+	treeView->expand(p_base->index());
 }
