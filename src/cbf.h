@@ -30,6 +30,7 @@ private:
 	void decryptFile(uint8_t *data, uint32_t size);
 public:
 	CBF(QString name, AbstractFile *p_parent);
+	~CBF();
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };
 

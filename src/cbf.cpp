@@ -34,6 +34,10 @@ CBF::CBF(QString name, AbstractFile *p_parent)
 {
 }
 
+CBF::~CBF()
+{
+}
+
 std::vector<struct CBFFile *> CBF::getFileList(uint8_t *fileTable,
 	uint32_t tableSize)
 {
