@@ -37,7 +37,8 @@ CBF::~CBF()
 bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 {
 	struct CBFHeader *p_header;
-	std::vector<struct CBFFile *> files;
+	std::vector<struct CBFFile *> *p_files;
+	struct CBFFile *p_cbf_file;
 	uint8_t *p_table = NULL;
 	AbstractFile *ff;
 	QStringList path;
@@ -49,16 +50,16 @@ bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 	}
 	p_table = p_data + p_header->tableOffset;
 
-	files = getFileList(p_table, p_header->tableSize);
+	p_files = getFileList(p_table, p_header->tableSize);
 
 	if (p_progress) {
-		p_progress->setMaximum(files.size());
+		p_progress->setMaximum(p_files->size());
 		p_progress->setValue(0);
 		p_progress->show();
 	}
 
-	for(std::vector<struct CBFFile *>::iterator fit = files.begin();
-	fit != files.end(); ++fit) {
+	for(std::vector<struct CBFFile *>::iterator fit = p_files->begin();
+	fit != p_files->end(); ++fit) {
 		if (p_progress && p_progress->wasCanceled())
 			break;
 		QString n(((struct CBFFile *) *fit)->name);
@@ -80,6 +81,13 @@ bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 		qApp->processEvents();
 	}
 
+	while (!p_files->empty()) {
+		p_cbf_file = p_files->back();
+		p_files->pop_back();
+		free(p_cbf_file);
+	}
+	delete p_files;
+
 	if (p_progress && p_progress->wasCanceled()) {
 		while (!mp_children.empty()) {
 			ff = mp_children.back();
@@ -91,10 +99,11 @@ bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 	return true;
 }
 
-std::vector<struct CBFFile *> CBF::getFileList(uint8_t *p_fileTable,
+std::vector<struct CBFFile *> *CBF::getFileList(uint8_t *p_fileTable,
 					       uint32_t tableSize)
 {
-	std::vector<struct CBFFile *> fileList;
+	std::vector<struct CBFFile *> *p_fileList =
+			new std::vector<struct CBFFile *>();
 	struct CBFFile *p_file;
 
 	for (uint32_t pos = 0; pos + 2 < tableSize; pos += sizeof_CBF(p_file))
@@ -105,10 +114,10 @@ std::vector<struct CBFFile *> CBF::getFileList(uint8_t *p_fileTable,
 		       sizeof_CBF((struct CBFFile *) (p_fileTable + pos)));
 		decryptTable((uint8_t *) p_file, p_file->structSize);
 
-		fileList.push_back(p_file);
+		p_fileList->push_back(p_file);
 	}
 
-	return fileList;
+	return p_fileList;
 }
 
 void CBF::decryptTable(uint8_t *p_data, uint16_t size)

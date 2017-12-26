@@ -112,6 +112,7 @@ void VCBrowser::open()
 
 		af = AbstractFile::createFile(path[path.size() - 1]);
 		af->setData(data, size, progress);
+		delete[] data;
 		if (progress->wasCanceled())
 			delete af;
 		else
