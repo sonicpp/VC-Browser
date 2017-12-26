@@ -32,7 +32,16 @@ AbstractFile::AbstractFile(bool dir, QString name, AbstractFile *p_parent,
 :m_dir(dir), m_name(name), mp_parent(p_parent)
 {
 	mp_widget = new QWidget();
-	mp_item = (p_item == NULL) ? (new QStandardItem(name)) : (p_item);
+
+	if (p_item == NULL) {
+		mp_item = new QStandardItem(name);
+		m_ext_item = false;
+	}
+	else {
+		mp_item = p_item;
+		m_ext_item = true;
+	}
+
 	mp_item->setData(QVariant::fromValue(this));
 }
 
@@ -47,6 +56,8 @@ AbstractFile::~AbstractFile()
 	}
 
 	delete mp_widget;
+	if (!m_ext_item)
+		delete mp_item;
 }
 
 bool AbstractFile::addFile(AbstractFile *p_file, QString name)

@@ -9,6 +9,7 @@
 class AbstractFile {
 private:
 	bool m_dir;
+	bool m_ext_item;
 protected:
 	bool m_compressed;
 	QString m_name;
