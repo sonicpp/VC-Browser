@@ -1,6 +1,3 @@
-#include <QTextEdit>
-#include <QTextCodec>
-
 #include "txt.h"
 
 TXT::TXT(QString name)
@@ -16,6 +13,7 @@ TXT::TXT(QString name)
 	mp_layout->addWidget(mp_status);
 	mp_widget->setLayout(mp_layout);
 
+	redrawWidget();
 }
 
 TXT::~TXT()
@@ -29,17 +27,24 @@ bool TXT::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
 {
 	char *buff;
 
-	m_str.clear();
-	mp_status->clearMessage();
-
 	buff = new char[size + 1];
 	memcpy(buff, data, size);
 	buff[size] = '\0';
 
 	m_str = mp_codec->toUnicode(buff);
-	mp_edit->setText(m_str);
-	mp_status->showMessage(QString("Bytes total: ") + QString::number(size) +
-		QString("; Chars total: ") + QString::number(m_str.size()));
 
 	delete[] buff;
+
+	redrawWidget();
+
+	return true;
+}
+
+void TXT::redrawWidget(void)
+{
+	mp_status->clearMessage();
+
+	mp_edit->setText(m_str);
+	mp_status->showMessage(QString("Chars total: ") +
+			       QString::number(m_str.size()));
 }
