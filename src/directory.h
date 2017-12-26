@@ -8,12 +8,13 @@
 
 class Directory: public AbstractFile {
 protected:
-	QTextEdit *m_edit;
-	QStatusBar *m_status;
-	QVBoxLayout *m_layout;
+	QTextEdit *mp_edit;
+	QStatusBar *mp_status;
+	QVBoxLayout *mp_layout;
 public:
 	Directory(QString name, AbstractFile *p_parent,
 		QStandardItem *p_item = NULL);
+	~Directory();
 	bool setData(uint8_t *data, size_t size, QProgressDialog *p_progress = NULL);
 };
 
