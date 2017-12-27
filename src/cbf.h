@@ -15,6 +15,7 @@ public:
 	bool setData(uint8_t *p_data, size_t size,
 		     QProgressDialog *p_progress = NULL);
 private:
+	void *getHeader(uint8_t *p_data, size_t size);
 	std::vector<struct CBFFile *> *getFileList(uint8_t *p_fileTable,
 						   uint32_t tableSize);
 	void decryptTable(uint8_t *p_data, uint16_t size);

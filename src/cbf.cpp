@@ -4,6 +4,18 @@
 
 #include "cbf.h"
 
+/* CBF Header */
+struct CBF_Header {
+	uint32_t sig1;
+	uint32_t sig2;
+	uint32_t unk1;
+	uint32_t unk2;
+	uint32_t unk3;
+	uint32_t tableOffset;
+	uint32_t unk4;
+	uint32_t tableSize;
+} __attribute__((packed));
+
 struct CBFFile {
 	uint16_t structSize;	// size of the rest of this struct
 	uint32_t offset;
@@ -16,16 +28,8 @@ struct CBFFile {
 } __attribute__((packed));
 #define sizeof_CBF(file) ((file)->structSize + sizeof((file)->structSize))
 
-struct CBFHeader {
-	uint32_t sig1;
-	uint32_t sig2;
-	uint32_t unk1;
-	uint32_t unk2;
-	uint32_t unk3;
-	uint32_t tableOffset;
-	uint32_t unk4;
-	uint32_t tableSize;
-} __attribute__((packed));
+#define _getHeader(data, size) ((struct CBF_Header *) \
+	getHeader((p_data), (size)))
 
 CBF::CBF(QString name)
 :AbstractFile(true, name)
@@ -38,20 +42,19 @@ CBF::~CBF()
 
 bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 {
-	struct CBFHeader *p_header;
+	struct CBF_Header *p_header;
 	std::vector<struct CBFFile *> *p_files;
 	struct CBFFile *p_cbf_file;
 	uint8_t *p_table = NULL;
 	AbstractFile *ff;
 	QStringList path;
 
-	p_header = (struct CBFHeader *) p_data;
-	if (p_header->sig1 != 0x46474942 ||	// BIGF
-	p_header->sig2 != 0x4C425A01) {		// .ZBL
-			return false;
-	}
-	p_table = p_data + p_header->tableOffset;
+	/* Get CBF header */
+	if ((p_header = _getHeader(p_data, size)) == NULL)
+		return false;
 
+	/* Get CBF file list */
+	p_table = p_data + p_header->tableOffset;
 	p_files = getFileList(p_table, p_header->tableSize);
 
 	if (p_progress) {
@@ -60,6 +63,7 @@ bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 		p_progress->show();
 	}
 
+	/* Loop through all CBF files */
 	for(std::vector<struct CBFFile *>::iterator fit = p_files->begin();
 	fit != p_files->end(); ++fit) {
 		if (p_progress && p_progress->wasCanceled())
@@ -103,6 +107,22 @@ bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 	}
 
 	return true;
+}
+
+void *CBF::getHeader(uint8_t *p_data, size_t size)
+{
+	struct CBF_Header *p_header;
+
+	if (size < sizeof(struct CBF_Header))
+		return NULL;
+
+	p_header = (struct CBF_Header *) p_data;
+	if (p_header->sig1 != 0x46474942 ||	// BIGF
+	p_header->sig2 != 0x4C425A01) {		// .ZBL
+		return NULL;
+	}
+
+	return (void *) p_header;
 }
 
 std::vector<struct CBFFile *> *CBF::getFileList(uint8_t *p_fileTable,
