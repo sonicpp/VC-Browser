@@ -23,12 +23,12 @@ TXT::~TXT()
 	delete mp_layout;
 }
 
-bool TXT::setData(uint8_t *data, size_t size, QProgressDialog *p_progress)
+bool TXT::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 {
 	char *buff;
 
 	buff = new char[size + 1];
-	memcpy(buff, data, size);
+	memcpy(buff, p_data, size);
 	buff[size] = '\0';
 
 	m_str = mp_codec->toUnicode(buff);
