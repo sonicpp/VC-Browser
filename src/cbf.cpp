@@ -8,7 +8,7 @@
 struct CBF_Header {
 	uint32_t sig1;
 	uint32_t sig2;
-	uint32_t unk1;
+	uint32_t fileSize;	/**< Size of this CBF file */
 	uint32_t unk2;
 	uint32_t unk3;
 	uint32_t tableOffset;
