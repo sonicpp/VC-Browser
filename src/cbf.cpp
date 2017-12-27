@@ -1,4 +1,6 @@
 #include <QApplication>
+#include <QBrush>
+#include <QColor>
 
 #include "cbf.h"
 
@@ -69,11 +71,15 @@ bool CBF::setData(uint8_t *p_data, size_t size, QProgressDialog *p_progress)
 		if (((struct CBFFile *) *fit)->compressed) {
 
 			ff->setCompressed(true);
+			/* Show compressed files as unsupported */
+			ff->getItem()->setBackground(QBrush(QColor("red")));
 		}
 		else {
 			decryptFile(p_data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
 			ff->setCompressed(false);
-			ff->setData(p_data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size);
+			if (!ff->setData(p_data + ((struct CBFFile *) *fit)->offset, ((struct CBFFile *) *fit)->size))
+				/* Setting file data failed, mark file as unsupported */
+				ff->getItem()->setBackground(QBrush(QColor("red")));
 		}
 		addFile(ff, n);
 		if (p_progress)
